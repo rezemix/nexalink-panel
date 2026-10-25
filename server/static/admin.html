@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEXALINK Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f4f5f7;--surface:#ffffff;--surface-2:#f8f9fb;--line:#e6e8ec;--line-2:#d9dce2;
+  --text:#101215;--text-2:#4b5059;--muted:#80858f;
+  --accent:#4f46e5;--accent-2:#6366f1;--accent-soft:#eef0ff;--accent-ink:#ffffff;
+  --good:#12a150;--good-soft:#e6f6ed;--warn:#c27c00;--warn-soft:#fdf3e1;--bad:#d63b3b;--bad-soft:#fde9e9;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;--s5:#e87ba4;--s6:#008300;--s7:#6250d6;--s8:#e34948;
+  --shadow:0 1px 2px rgba(16,18,21,.04),0 4px 16px rgba(16,18,21,.05);
+  --radius:14px;
+}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){
+  color-scheme:dark;
+  --bg:#0c0d10;--surface:#15171c;--surface-2:#1b1e24;--line:#262a32;--line-2:#323742;
+  --text:#eceef2;--text-2:#b4b9c3;--muted:#7f8592;
+  --accent:#7c74ff;--accent-2:#8d86ff;--accent-soft:#23214a;--accent-ink:#ffffff;
+  --good:#3cc377;--good-soft:#16301f;--warn:#e3a43a;--warn-soft:#33270f;--bad:#f06767;--bad-soft:#3a1b1b;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300;--s7:#9085e9;--s8:#e66767;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0c0d10;--surface:#15171c;--surface-2:#1b1e24;--line:#262a32;--line-2:#323742;
+  --text:#eceef2;--text-2:#b4b9c3;--muted:#7f8592;
+  --accent:#7c74ff;--accent-2:#8d86ff;--accent-soft:#23214a;--accent-ink:#ffffff;
+  --good:#3cc377;--good-soft:#16301f;--warn:#e3a43a;--warn-soft:#33270f;--bad:#f06767;--bad-soft:#3a1b1b;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--s6:#008300;--s7:#9085e9;--s8:#e66767;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent);text-decoration:none}
+svg{display:block}
+.hidden{display:none!important}
+
+/* layout */
+.shell{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.side{position:sticky;top:0;height:100vh;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:18px 14px}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 20px}
+.brand .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#22c1c3);display:grid;place-items:center;color:#fff;font-weight:700}
+.brand b{font-size:15px;letter-spacing:.3px}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:-2px}
+.nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;color:var(--text-2);font-weight:500;cursor:pointer;margin-bottom:2px}
+.nav a:hover{background:var(--surface-2);color:var(--text)}
+.nav a.on{background:var(--accent-soft);color:var(--accent)}
+.nav svg{width:18px;height:18px;flex:none}
+.side .spacer{flex:1}
+.side-foot{display:flex;gap:6px;padding:8px}
+.main{min-width:0;padding:26px 30px 60px}
+.topline{display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+.topline h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.2px;flex:1}
+.topline .sub{color:var(--muted);font-size:13px;width:100%;margin-top:-10px}
+.mobile-bar{display:none}
+
+/* primitives */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-h{display:flex;align-items:center;gap:10px;padding:16px 18px 0}
+.card-h h3{margin:0;font-size:14px;font-weight:600;flex:1}
+.card-b{padding:16px 18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line-2);background:var(--surface);padding:7px 13px;border-radius:10px;cursor:pointer;font-weight:500;white-space:nowrap;transition:background .15s,border-color .15s}
+.btn:hover{background:var(--surface-2)}
+.btn.p{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.p:hover{background:var(--accent-2)}
+.btn.d{color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:var(--surface-2)}
+.btn.s{padding:4px 9px;font-size:12.5px;border-radius:8px}
+.btn.icon{padding:6px;width:32px;height:32px}
+.btn svg{width:16px;height:16px}
+input,select,textarea{background:var(--surface);border:1px solid var(--line-2);border-radius:10px;padding:8px 11px;width:100%;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+textarea{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+label.f{display:block;margin-bottom:12px}
+label.f>span{display:block;color:var(--text-2);font-size:12.5px;font-weight:500;margin-bottom:5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.muted{background:var(--surface-2);color:var(--muted)}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:7px;font-size:12px;background:var(--surface-2);border:1px solid var(--line);color:var(--text-2)}
+.muted{color:var(--muted)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.grow{flex:1}
+
+/* kpi */
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.kpi{padding:16px 18px}
+.kpi .k{color:var(--muted);font-size:12.5px;font-weight:500;display:flex;align-items:center;gap:6px}
+.kpi .v{font-size:26px;font-weight:700;letter-spacing:-.5px;margin-top:6px}
+.kpi .h{font-size:12px;color:var(--text-2);margin-top:2px}
+.dash{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+.stack{display:flex;flex-direction:column;gap:18px}
+
+/* chart */
+.chart-wrap{position:relative}
+.chart-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--text-2)}
+.chart-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:2px}
+.seg button{border:0;background:transparent;padding:4px 10px;border-radius:8px;cursor:pointer;color:var(--text-2);font-size:12.5px;font-weight:500}
+.seg button.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:10px;padding:8px 10px;font-size:12px;min-width:150px;z-index:5;display:none}
+.tip b{display:block;margin-bottom:4px}
+.tip .r{display:flex;align-items:center;gap:6px;justify-content:space-between}
+.tip .r span{display:flex;align-items:center;gap:6px;color:var(--text-2)}
+.tip i{width:8px;height:8px;border-radius:2px;display:inline-block}
+
+/* lists */
+.list .it{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.list .it:last-child{border-bottom:0}
+.avatar{width:30px;height:30px;border-radius:9px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
+.bar{height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.bar.good>i{background:var(--good)}.bar.warn>i{background:var(--warn)}.bar.bad>i{background:var(--bad)}
+
+/* nodes */
+.nodes{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:18px}
+.node-h{display:flex;align-items:flex-start;gap:12px;padding:16px 18px 12px}
+.flag{font-size:26px;line-height:1}
+.node-h h3{margin:0;font-size:15px}
+.node-h .addr{color:var(--muted);font-size:12.5px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 18px 14px}
+.metric{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+.metric .k{font-size:11.5px;color:var(--muted)}
+.metric .v{font-weight:600;margin:2px 0 5px}
+.protos{border-top:1px solid var(--line)}
+.proto{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--line)}
+.proto:last-child{border-bottom:0}
+.proto .nm{flex:1;min-width:0}
+.proto .nm b{font-weight:600;font-size:13px}
+.proto .nm div{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node-f{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--line);flex-wrap:wrap}
+.switch{position:relative;width:34px;height:20px;flex:none;cursor:pointer}
+.switch input{opacity:0;width:0;height:0}
+.switch span{position:absolute;inset:0;background:var(--line-2);border-radius:999px;transition:.2s}
+.switch span::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.switch input:checked+span{background:var(--accent)}
+.switch input:checked+span::after{transform:translateX(14px)}
+
+/* table */
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line-2);background:var(--surface);padding:5px 11px;border-radius:999px;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--text-2)}
+.chip.on{background:var(--text);border-color:var(--text);color:var(--bg)}
+.chip .n{opacity:.6;margin-left:4px}
+.tbl{width:100%;border-collapse:separate;border-spacing:0}
+.tbl th{text-align:left;font-size:12px;font-weight:600;color:var(--muted);padding:11px 14px;border-bottom:1px solid var(--line);background:var(--surface-2);white-space:nowrap}
+.tbl th:first-child{border-top-left-radius:var(--radius)}.tbl th:last-child{border-top-right-radius:var(--radius)}
+.tbl td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tbody tr{cursor:pointer;transition:background .12s}
+.tbl tbody tr:hover{background:var(--surface-2)}
+.uname{display:flex;align-items:center;gap:10px}
+.uname b{font-weight:600}
+.uname small{display:block;color:var(--muted);font-size:12px}
+.online-dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px var(--good-soft);flex:none}
+.tbl-wrap{overflow-x:auto}
+.pager{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+.bulk{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--accent-soft);border-bottom:1px solid var(--line);font-size:13px}
+
+/* drawer & modal */
+.overlay{position:fixed;inset:0;background:rgba(8,9,12,.45);backdrop-filter:blur(2px);z-index:30;display:none}
+.overlay.on{display:block}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:min(520px,100vw);background:var(--surface);border-left:1px solid var(--line);z-index:31;transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column}
+.drawer.on{transform:none}
+.drawer-h{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.drawer-h h2{margin:0;font-size:17px;flex:1}
+.drawer-b{padding:18px 20px;overflow-y:auto;flex:1}
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-48%) scale(.98);opacity:0;pointer-events:none;width:min(560px,calc(100vw - 32px));max-height:calc(100vh - 40px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;z-index:32;transition:.18s;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+.modal-h{display:flex;align-items:center;padding:18px 20px 0}
+.modal-h h3{margin:0;flex:1;font-size:16px}
+.modal-b{padding:16px 20px}
+.modal-f{display:flex;gap:8px;justify-content:flex-end;padding:0 20px 18px;flex-wrap:wrap}
+.section{margin-bottom:20px}
+.section h4{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.kv{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.kv>div{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.kv span{display:block;font-size:11.5px;color:var(--muted)}
+.kv b{font-weight:600}
+.qr{background:#fff;padding:12px;border-radius:12px;width:fit-content;margin:0 auto 10px}
+.copybox{display:flex;gap:6px}
+.copybox input{font-family:ui-monospace,monospace;font-size:12px}
+.quick{display:flex;gap:6px;flex-wrap:wrap}
+
+/* toast & login */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:60;transition:.2s;pointer-events:none;font-weight:500;max-width:90vw}
+#toast.on{opacity:1;transform:translateX(-50%)}
+.login{min-height:100vh;display:grid;place-items:center;padding:16px;background:radial-gradient(1200px 600px at 20% -10%,var(--accent-soft),transparent),var(--bg)}
+.login .card{width:min(380px,100%);padding:28px}
+.empty{padding:40px 16px;text-align:center;color:var(--muted)}
+.skel{background:linear-gradient(90deg,var(--surface-2),var(--line),var(--surface-2));background-size:200% 100%;animation:sk 1.2s infinite;border-radius:8px}
+@keyframes sk{to{background-position:-200% 0}}
+.menu{position:absolute;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:6px;z-index:40;min-width:200px}
+.menu button{display:flex;width:100%;gap:8px;align-items:center;border:0;background:transparent;padding:8px 10px;border-radius:8px;cursor:pointer;text-align:left}
+.menu button:hover{background:var(--surface-2)}
+.menu button.d{color:var(--bad)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+
+@media (max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.dash{grid-template-columns:1fr}}
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{position:fixed;left:0;top:0;z-index:35;width:250px;transform:translateX(-100%);transition:transform .2s}
+  .side.on{transform:none}
+  .mobile-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+  .main{padding:18px 16px 60px}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .nodes{grid-template-columns:1fr}
+  .grid2,.kv{grid-template-columns:1fr}
+  .hide-m{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="login" class="login hidden">
+  <div class="card">
+    <div class="brand" style="padding:0 0 18px"><div class="logo">N</div><div><b>NEXALINK</b><small>Панель управления</small></div></div>
+    <form id="loginForm">
+      <label class="f"><span>Логин</span><input name="username" value="admin" autocomplete="username"></label>
+      <label class="f"><span>Пароль</span><input name="password" type="password" autocomplete="current-password" autofocus></label>
+      <button class="btn p" style="width:100%;padding:10px">Войти</button>
+    </form>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="mobile-bar">
+    <button class="btn icon ghost" onclick="toggleSide()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <b>NEXALINK</b>
+  </div>
+  <div class="shell">
+    <aside class="side" id="side">
+      <div class="brand"><div class="logo">N</div><div><b>NEXALINK</b><small>Панель управления</small></div></div>
+      <nav class="nav">
+        <a data-page="dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>Обзор</a>
+        <a data-page="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-7"/></svg>Статистика</a>
+        <a data-page="users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-7 7-7s7 3 7 7"/><path d="M16 4a4 4 0 0 1 0 8M22 21c0-3-2-6-5-7"/></svg>Пользователи</a>
+        <a data-page="nodes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg>Ноды</a>
+        <a data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Настройки</a>
+      </nav>
+      <div class="spacer"></div>
+      <div class="side-foot">
+        <button class="btn s ghost" onclick="cycleTheme()" id="themeBtn" title="Светлая / тёмная / как в системе">Тема</button>
+        <span class="grow"></span>
+        <button class="btn s ghost" onclick="logout()">Выйти</button>
+      </div>
+    </aside>
+    <main class="main" id="main"></main>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+<aside class="drawer" id="drawer"></aside>
+<div class="modal" id="modal"></div>
+<div id="toast"></div>
+
+<script>
+/* ===== утилиты ===== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const attr = o => esc(JSON.stringify(o));
+let token = localStorage.getItem("panel_token") || "";
+let page = location.hash.slice(1) || "dash";
+let protocols = [], timer = null;
+const SERIES = ["--s1","--s2","--s3","--s4","--s5","--s6","--s7","--s8"];
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("on"),2600); }
+async function api(method, path, body){
+  const r = await fetch(path,{method,headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});
+  if (r.status===401 && !path.includes("/login")) { logout(); throw new Error("Сессия истекла"); }
+  const data = await r.json().catch(()=>({}));
+  if (!r.ok) throw new Error(data.detail || ("Ошибка "+r.status));
+  return data.response ?? data;
+}
+const fmtBytes = (b, d=1) => { b=+b||0; const u=["Б","КБ","МБ","ГБ","ТБ"]; let i=0; while(b>=1024&&i<4){b/=1024;i++;} return (i?b.toFixed(b<10?d:0):b)+" "+u[i]; };
+const fmtSpeed = b => fmtBytes(b)+"/с";
+const fmtDate = s => s ? new Date(s).toLocaleDateString("ru-RU",{day:"2-digit",month:"short",year:"numeric"}) : "—";
+const fmtDT = s => s ? new Date(s).toLocaleString("ru-RU",{dateStyle:"short",timeStyle:"short"}) : "—";
+const ago = s => { if(!s) return "никогда"; const d=(Date.now()-new Date(s))/1000; if(d<90) return "сейчас"; if(d<3600) return Math.floor(d/60)+" мин назад"; if(d<86400) return Math.floor(d/3600)+" ч назад"; return Math.floor(d/86400)+" дн назад"; };
+const daysLeft = s => Math.ceil((new Date(s)-Date.now())/86400e3);
+const flag = c => c && c.length===2 ? String.fromCodePoint(...[...c.toUpperCase()].map(ch=>0x1F1E6+ch.charCodeAt(0)-65)) : "🌐";
+const uptime = s => !s ? "—" : s<3600 ? Math.floor(s/60)+" мин" : s<86400 ? Math.floor(s/3600)+" ч" : Math.floor(s/86400)+" дн";
+const copy = t => navigator.clipboard.writeText(t).then(()=>toast("Скопировано"));
+const initials = n => { const m=/^nx_(\d+)/.exec(n||""); if(m) return m[1].slice(0,3); const s=(n||"?").replace(/[^A-Za-zА-Яа-я0-9]/g,""); return (s||"?").slice(0,2).toUpperCase(); };
+const STATUS = {ACTIVE:["good","Активен"],DISABLED:["muted","Отключён"],LIMITED:["warn","Лимит трафика"],EXPIRED:["bad","Истёк"]};
+const statusPill = s => { const [c,t]=STATUS[s]||["muted",s]; return `<span class="pill ${c}">${t}</span>`; };
+
+/* ===== тема ===== */
+function applyTheme(){ const t=localStorage.getItem("theme"); if(t) document.documentElement.dataset.theme=t; else delete document.documentElement.dataset.theme; }
+function cycleTheme(){ const t=localStorage.getItem("theme"); const n = t==="dark"?"light":t==="light"?"":"dark"; if(n) localStorage.setItem("theme",n); else localStorage.removeItem("theme"); applyTheme(); toast(n?("Тема: "+(n==="dark"?"тёмная":"светлая")):"Тема: как в системе"); if(page==="dash") dash(); if(page==="stats") stats(); }
+applyTheme();
+
+/* ===== навигация ===== */
+function show(){ $("#login").classList.toggle("hidden",!!token); $("#app").classList.toggle("hidden",!token); if(token) go(page); }
+function logout(){ token=""; localStorage.removeItem("panel_token"); show(); }
+function toggleSide(){ $("#side").classList.toggle("on"); }
+$("#loginForm").onsubmit = async e => { e.preventDefault(); const f=new FormData(e.target);
+  try { const r=await api("POST","/api/admin/login",{username:f.get("username"),password:f.get("password")}); token=r.accessToken; localStorage.setItem("panel_token",token); show(); } catch(err){ toast(err.message); } };
+document.querySelectorAll(".nav a").forEach(a=>a.onclick=()=>{ $("#side").classList.remove("on"); go(a.dataset.page); });
+
+async function go(p){
+  page=p; location.hash=p; clearInterval(timer);
+  document.querySelectorAll(".nav a").forEach(a=>a.classList.toggle("on",a.dataset.page===p));
+  if(!protocols.length) protocols = await api("GET","/api/protocols").catch(()=>[]);
+  const fn = {dash,stats,users,nodes,settings}[p]||dash;
+  await fn().catch(e=>toast(e.message));
+  if(p==="dash"||p==="nodes") timer=setInterval(()=>fn(true).catch(()=>{}),15000);
+  if(p==="stats") timer=setInterval(()=>fn(true).catch(()=>{}),60000);
+}
+
+/* ===== модалки и шторка ===== */
+function closeAll(){ $("#modal").classList.remove("on"); $("#drawer").classList.remove("on"); $("#overlay").classList.remove("on"); closeMenu(); }
+function modal(title, body, actions, onSubmit){
+  const m=$("#modal");
+  m.innerHTML=`<form><div class="modal-h"><h3>${title}</h3><button type="button" class="btn icon ghost" onclick="closeAll()">✕</button></div><div class="modal-b">${body}</div><div class="modal-f">${actions}</div></form>`;
+  m.querySelector("form").onsubmit = async e => { e.preventDefault(); try{ if(await onSubmit(new FormData(e.target))!==false) closeAll(); }catch(err){ toast(err.message); } };
+  $("#overlay").classList.add("on"); m.classList.add("on");
+  setTimeout(()=>m.querySelector("input:not([readonly])")?.focus(),50);
+}
+function confirmBox(text, okText="Удалить"){ return new Promise(res=>{ modal("Подтвердите",`<p style="margin:0">${text}</p>`,`<button type="button" class="btn" onclick="closeAll()">Отмена</button><button class="btn p" style="background:var(--bad);border-color:var(--bad)">${okText}</button>`,()=>res(true)); }); }
+function drawer(html){ const d=$("#drawer"); d.innerHTML=html; $("#overlay").classList.add("on"); d.classList.add("on"); }
+let menuEl=null;
+function closeMenu(){ menuEl?.remove(); menuEl=null; }
+function openMenu(ev, items){
+  ev.stopPropagation(); closeMenu();
+  menuEl=document.createElement("div"); menuEl.className="menu";
+  menuEl.innerHTML=items.map(i=>i==="-"?"<hr>":`<button class="${i.d?"d":""}">${i.t}</button>`).join("");
+  const btns=[...menuEl.querySelectorAll("button")]; items.filter(i=>i!=="-").forEach((i,k)=>btns[k].onclick=()=>{closeMenu(); i.f();});
+  document.body.appendChild(menuEl);
+  const r=ev.currentTarget.getBoundingClientRect(); const w=menuEl.offsetWidth, h=menuEl.offsetHeight;
+  menuEl.style.left=Math.max(8,Math.min(r.right-w, innerWidth-w-8))+scrollX+"px";
+  menuEl.style.top=(r.bottom+h+8>innerHeight? r.top-h-6 : r.bottom+6)+scrollY+"px";
+}
+document.addEventListener("click", closeMenu);
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeAll(); });
+
+/* ===== обзор ===== */
+let histDays = 30;
+async function dash(silent){
+  const [s, ns, h] = await Promise.all([api("GET","/api/system/stats"), api("GET","/api/nodes"), api("GET","/api/system/history?days="+histDays)]);
+  const total30 = h.days.reduce((a,d)=>a+d.total,0);
+  $("#main").innerHTML = `
+  <div class="topline"><h1>Обзор</h1><span class="muted">Обновляется каждые 15 с</span></div>
+  <div class="kpis">
+    ${kpi("Активные пользователи", s.users.ACTIVE, `из ${s.users.total} всего`)}
+    ${kpi("Онлайн сейчас", s.onlineUsers, "за последние 3 мин", "good")}
+    ${kpi("Ноды", `${s.nodes.online}/${s.nodes.total}`, s.nodes.online===s.nodes.total?"все онлайн":"есть проблемы", s.nodes.online===s.nodes.total?"good":"bad")}
+    ${kpi("Трафик сегодня", fmtBytes(s.trafficTodayBytes), "все ноды")}
+    ${kpi(`Трафик за ${histDays} дн`, fmtBytes(total30), `всего ${fmtBytes(s.trafficBytes)}`)}
+    ${kpi("Истекают за 3 дня", s.expiringSoon.length, `истекло: ${s.users.EXPIRED}`, s.expiringSoon.length?"warn":"")}
+  </div>
+  <div class="dash">
+    <div class="stack">
+      <div class="card">
+        <div class="card-h"><h3>Трафик по нодам</h3>
+          <div class="seg">${[7,30,90].map(d=>`<button class="${d===histDays?"on":""}" onclick="histDays=${d};dash()">${d} дн</button>`).join("")}</div>
+        </div>
+        <div class="card-b">
+          <div class="chart-legend" style="margin-bottom:10px">${h.nodes.map((n,i)=>`<span><i style="background:var(${SERIES[i%8]})"></i>${esc(n.name)}</span>`).join("")}</div>
+          <div class="chart-wrap" id="chart"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Ноды</h3><a onclick="go('nodes')" style="cursor:pointer;font-size:13px">Все ноды →</a></div>
+        <div class="card-b list">${ns.map(n=>`
+          <div class="it"><span class="flag" style="font-size:20px">${flag(n.countryCode)}</span>
+            <div class="grow"><b>${esc(n.name)}</b><div class="muted" style="font-size:12px">${esc(n.address)} · ${n.usersOnline} онлайн · сегодня ${fmtBytes(n.trafficTodayBytes)}</div></div>
+            ${n.sysStats?`<div class="hide-m" style="width:110px"><div class="muted" style="font-size:11px">RAM ${Math.round(n.sysStats.mem_used/n.sysStats.mem_total*100)}%</div>${bar(n.sysStats.mem_used/n.sysStats.mem_total)}</div>`:""}
+            ${nodeStatus(n)}</div>`).join("") || `<div class="empty">Нод пока нет</div>`}
+        </div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="card"><div class="card-h"><h3>Скоро истекают</h3></div><div class="card-b list">
+        ${s.expiringSoon.map(u=>`<div class="it" style="cursor:pointer" onclick="openUser('${u.uuid}')"><div class="avatar">${initials(u.username)}</div><div class="grow"><b>${esc(u.username)}</b><div class="muted" style="font-size:12px">${esc(u.description||"")}</div></div><span class="pill warn">${Math.max(0,daysLeft(u.expire_at))} дн</span></div>`).join("") || `<div class="empty" style="padding:16px">Никто не истекает в ближайшие 3 дня</div>`}
+      </div></div>
+      <div class="card"><div class="card-h"><h3>Топ по трафику · ${histDays} дн</h3></div><div class="card-b list">
+        ${h.topUsers.map(u=>`<div class="it" style="cursor:pointer" onclick="openUser('${u.uuid}')"><div class="avatar">${initials(u.username)}</div><div class="grow"><b>${esc(u.username)}</b><div class="muted" style="font-size:12px">${esc(u.description||"")}</div></div><b>${fmtBytes(u.bytes)}</b></div>`).join("") || `<div class="empty" style="padding:16px">Пока нет данных</div>`}
+      </div></div>
+    </div>
+  </div>`;
+  drawChart(h);
+}
+const kpi = (k,v,h,tone="") => `<div class="card kpi"><div class="k">${k}</div><div class="v" style="${tone?`color:var(--${tone})`:""}">${v}</div><div class="h">${h}</div></div>`;
+const bar = (frac, tone) => { const p=Math.max(0,Math.min(1,frac||0)); const t=tone||(p>.9?"bad":p>.75?"warn":""); return `<div class="bar ${t}"><i style="width:${(p*100).toFixed(1)}%"></i></div>`; };
+function nodeStatus(n){
+  if(n.isDisabled) return `<span class="pill muted">Отключена</span>`;
+  if(!n.isNodeOnline) return `<span class="pill bad">Нет связи</span>`;
+  if(n.lastStatusMessage) return `<span class="pill warn" title="${esc(n.lastStatusMessage)}">Ошибка</span>`;
+  if(!n.isSynced) return `<span class="pill warn">Синхронизация</span>`;
+  return `<span class="pill good">Онлайн</span>`;
+}
+
+function drawChart(h){
+  const el=$("#chart"); if(!el) return;
+  const W=el.clientWidth||700, H=240, pl=52, pr=8, pt=8, pb=26;
+  const days=h.days, nodes=h.nodes, n=days.length;
+  const max=Math.max(1,...days.map(d=>d.total));
+  const pow=Math.pow(1024,Math.max(0,Math.floor(Math.log(max)/Math.log(1024))));
+  const nice=Math.ceil(max/pow/4)*4*pow||1;
+  const y=v=>pt+(H-pt-pb)*(1-v/nice);
+  const bw=(W-pl-pr)/n, gap=Math.max(2,bw*.25);
+  let svg=`<svg width="${W}" height="${H}" role="img" aria-label="Трафик по дням">`;
+  for(let i=0;i<=4;i++){ const v=nice*i/4, yy=y(v); svg+=`<line x1="${pl}" x2="${W-pr}" y1="${yy}" y2="${yy}" stroke="${cssv("--line")}" stroke-width="1"/><text x="${pl-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="${cssv("--muted")}">${fmtBytes(v,0)}</text>`; }
+  const every=Math.ceil(n/8);
+  days.forEach((d,i)=>{
+    const x=pl+i*bw+gap/2, w=Math.max(1,bw-gap); let acc=0;
+    nodes.forEach((nd,k)=>{ const v=d.nodes[nd.uuid]||0; if(!v) return; const y0=y(acc), y1=y(acc+v); acc+=v;
+      const hgt=Math.max(1,y0-y1-(acc<d.total?2:0));
+      svg+=`<rect x="${x}" y="${y1}" width="${w}" height="${hgt}" rx="${acc===d.total?Math.min(4,w/2):0}" fill="${cssv(SERIES[k%8])}"/>`; });
+    if(i%every===0) svg+=`<text x="${x+w/2}" y="${H-8}" text-anchor="middle" font-size="11" fill="${cssv("--muted")}">${new Date(d.day).toLocaleDateString("ru-RU",{day:"numeric",month:"short"})}</text>`;
+    svg+=`<rect x="${pl+i*bw}" y="${pt}" width="${bw}" height="${H-pt-pb}" fill="transparent" data-i="${i}"/>`;
+  });
+  svg+=`<line x1="${pl}" x2="${W-pr}" y1="${y(0)}" y2="${y(0)}" stroke="${cssv("--line-2")}"/></svg><div class="tip" id="tip"></div>`;
+  el.innerHTML=svg;
+  const tip=$("#tip");
+  el.querySelectorAll("rect[data-i]").forEach(r=>{
+    r.onmousemove=e=>{ const d=days[+r.dataset.i];
+      tip.innerHTML=`<b>${new Date(d.day).toLocaleDateString("ru-RU",{day:"numeric",month:"long"})}</b>`+nodes.map((nd,k)=>`<div class="r"><span><i style="background:var(${SERIES[k%8]})"></i>${esc(nd.name)}</span>${fmtBytes(d.nodes[nd.uuid]||0)}</div>`).join("")+`<div class="r" style="margin-top:4px;border-top:1px solid var(--line);padding-top:4px"><span>Всего</span><b>${fmtBytes(d.total)}</b></div>`;
+      const b=el.getBoundingClientRect(); let lx=e.clientX-b.left+14; if(lx+170>b.width) lx=e.clientX-b.left-184;
+      tip.style.left=lx+"px"; tip.style.top=Math.max(0,e.clientY-b.top-40)+"px"; tip.style.display="block"; };
+    r.onmouseleave=()=>tip.style.display="none";
+  });
+}
+addEventListener("resize",()=>{ if(page==="dash"||page==="stats") clearTimeout(window._rz), window._rz=setTimeout(()=>(page==="dash"?dash:stats)(),200); });
+
+/* ===== статистика ===== */
+let stDays = 30, stOnline = 24;
+const DL_SERIES = [["clickAndroid","Android"],["clickIos","iPhone"],["clickWindows","Windows"],["clickMac","Mac"]];
+const NEW_SERIES = [["app","Приложение"],["web","Сайт"],["extra","Другое устройство"],["manual","Вручную"]];
+const fmtN = n => (+n||0).toLocaleString("ru-RU");
+const dayLabel = (d, long) => new Date(d).toLocaleDateString("ru-RU", long?{day:"numeric",month:"long",weekday:"short"}:{day:"numeric",month:"short"});
+const delta = (cur, prev) => { if(!prev) return ""; const p=Math.round((cur-prev)/prev*100); return `${p>=0?"▲":"▼"} ${Math.abs(p)}% к прошлым ${stDays} дн`; };
+
+async function stats(silent){
+  const a = await api("GET",`/api/system/analytics?days=${stDays}&online_hours=${stOnline}`);
+  const k = a.kpi;
+  const ret = k.retentionTotal ? Math.round(k.retentionKept/k.retentionTotal*100)+"%" : "—";
+  const srcSum = a.sources.reduce((s,x)=>s+x.count,0)||1, platSum = a.platforms.reduce((s,x)=>s+x.count,0)||1;
+  const peakAt = k.onlinePeakAt ? new Date(k.onlinePeakAt*1000).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"}) : "";
+  $("#main").innerHTML = `
+  <div class="topline"><h1>Статистика</h1>
+    <div class="seg">${[7,30,90].map(d=>`<button class="${d===stDays?"on":""}" onclick="stDays=${d};stats()">${d} дн</button>`).join("")}</div>
+    <span class="sub">Активный пользователь — был трафик через VPN за день. Перенесённые со старого сайта не считаются новыми. Посетители сайта — только настоящие браузеры (счётчик на странице; с 20 по 25 октября не работал).</span></div>
+  <div class="kpis">
+    ${kpi("Онлайн сейчас", fmtN(k.onlineNow), k.onlinePeak24h!=null?`пик за сутки ${k.onlinePeak24h}${peakAt?" в "+peakAt:""}`:"история копится", "good")}
+    ${kpi("Активны сегодня", fmtN(k.dau), `открывали подписку: ${fmtN(k.openedToday)}`)}
+    ${kpi("Активны за 7 / 30 дн", `${fmtN(k.wau)} / ${fmtN(k.mau)}`, `из ${fmtN(k.totalUsers)} пользователей`)}
+    ${kpi(`Новые за ${stDays} дн`, fmtN(k.newPeriod), `сегодня +${k.newToday}${delta(k.newPeriod,k.newPrev)?" · "+delta(k.newPeriod,k.newPrev):""}`)}
+    ${kpi("Удержание 7 дн", ret, k.retentionTotal?`${k.retentionKept} из ${k.retentionTotal} пришедших ≥7 дн назад`:"мало данных — нужна неделя")}
+    ${kpi(`Трафик за ${stDays} дн`, fmtBytes(k.trafficPeriod), `≈ ${fmtBytes(k.trafficPerActive)} на активного`)}
+  </div>
+  <div class="dash">
+    <div class="stack">
+      <div class="card"><div class="card-h"><h3>Онлайн</h3>
+        <div class="seg">${[[24,"24 ч"],[168,"7 дн"],[720,"30 дн"]].map(([h,t])=>`<button class="${h===stOnline?"on":""}" onclick="stOnline=${h};stats()">${t}</button>`).join("")}</div></div>
+        <div class="card-b"><div class="chart-wrap" id="chOnline"></div></div></div>
+      <div class="card"><div class="card-h"><h3>Активные пользователи по дням</h3></div>
+        <div class="card-b"><div class="chart-wrap" id="chActive"></div></div></div>
+      <div class="card"><div class="card-h"><h3>Посетители сайта по дням</h3></div>
+        <div class="card-b"><div class="chart-wrap" id="chSite"></div></div></div>
+      <div class="card"><div class="card-h"><h3>Нажали «Скачать» на сайте</h3></div>
+        <div class="card-b">
+          <div class="chart-legend" style="margin-bottom:10px">${DL_SERIES.map(([,t],i)=>`<span><i style="background:var(${SERIES[i]})"></i>${t}</span>`).join("")}</div>
+          <div class="chart-wrap" id="chDl"></div></div></div>
+      <div class="card"><div class="card-h"><h3>Новые пользователи по дням</h3></div>
+        <div class="card-b">
+          <div class="chart-legend" style="margin-bottom:10px">${NEW_SERIES.map(([,t],i)=>`<span><i style="background:var(${SERIES[i]})"></i>${t}</span>`).join("")}</div>
+          <div class="chart-wrap" id="chNew"></div></div></div>
+    </div>
+    <div class="stack">
+      <div class="card"><div class="card-h"><h3>Сайт · ${stDays} дн</h3></div><div class="card-b list">
+        ${a.site.available ? `
+        <div class="it"><div class="grow">Посетителей (браузеры, без роботов)</div><b>${fmtN(a.site.visitorsPeriod)}</b></div>
+        <div class="it"><div class="grow">Нажали «Скачать»</div><b>${fmtN(a.site.downloadsPeriod)}</b></div>
+        <div class="it"><div class="grow">Доля нажавших</div><b>${a.site.conversion!=null?a.site.conversion+"%":"—"}</b></div>
+        <div class="it"><div class="grow">Обновились из приложения</div><b>${fmtN(a.site.updatesPeriod)}</b></div>
+        <div class="it"><div class="grow">Приложений на связи сегодня</div><b>${fmtN(a.site.appChecksToday)}</b></div>`
+        : `<div class="empty" style="padding:16px">Нет данных с сервера сайта</div>`}
+      </div></div>
+      <div class="card"><div class="card-h"><h3>Откуда пришли · ${stDays} дн</h3></div><div class="card-b list">
+        ${a.sources.map((x,i)=>`<div class="it"><i style="width:10px;height:10px;border-radius:3px;background:var(${SERIES[i]});flex:none"></i><div class="grow"><div class="row" style="justify-content:space-between"><span>${x.name}</span><b>${fmtN(x.count)}</b></div><div class="bar"><i style="width:${(x.count/srcSum*100).toFixed(1)}%;background:var(${SERIES[i]})"></i></div></div></div>`).join("")}
+      </div></div>
+      <div class="card"><div class="card-h"><h3>Устройства новых · ${stDays} дн</h3></div><div class="card-b list">
+        ${a.platforms.map(x=>`<div class="it"><div class="grow"><div class="row" style="justify-content:space-between"><span>${esc(x.name)}</span><b>${fmtN(x.count)} · ${Math.round(x.count/platSum*100)}%</b></div>${bar(x.count/platSum,"good")}</div></div>`).join("") || `<div class="empty" style="padding:16px">Новых пока нет</div>`}
+      </div></div>
+      <div class="card"><div class="card-h"><h3>Воронка · ${stDays} дн</h3></div><div class="card-b list">
+        <div class="it"><div class="grow">Зашли на сайт</div><b>${a.site.available?fmtN(a.site.visitorsPeriod):"—"}</b></div>
+        <div class="it"><div class="grow">Нажали «Скачать»</div><b>${a.site.available?fmtN(a.site.downloadsPeriod):"—"}</b></div>
+        <div class="it"><div class="grow">Получили доступ</div><b>${fmtN(k.newPeriod)}</b></div>
+        <div class="it"><div class="grow">Подключались хотя бы раз</div><b>${fmtN(Math.max(0,k.newPeriod-k.neverConnected))}</b></div>
+        <div class="it"><div class="grow">Ни разу не подключились</div><b>${fmtN(k.neverConnected)}</b></div>
+      </div></div>
+    </div>
+  </div>`;
+  barChart($("#chActive"), a.days, [{key:"active", name:"Активные", color:"--s1"}], fmtN,
+    d=>`<b>${dayLabel(d.day,1)}</b><div class="r"><span>Активные (трафик)</span><b>${fmtN(d.active)}</b></div><div class="r"><span>Открывали подписку</span>${fmtN(d.opened)}</div><div class="r"><span>Трафик</span>${fmtBytes(d.traffic)}</div>`);
+  barChart($("#chNew"), a.days, NEW_SERIES.map(([key,name],i)=>({key,name,color:SERIES[i],get:d=>d.new[key]})), fmtN,
+    d=>`<b>${dayLabel(d.day,1)}</b>`+NEW_SERIES.map(([key,name],i)=>`<div class="r"><span><i style="background:var(${SERIES[i]})"></i>${name}</span>${d.new[key]}</div>`).join("")+`<div class="r" style="margin-top:4px;border-top:1px solid var(--line);padding-top:4px"><span>Всего</span><b>${Object.values(d.new).reduce((s,v)=>s+v,0)}</b></div>`);
+  lineChart($("#chOnline"), a.online, a.sampleEvery);
+  barChart($("#chSite"), a.days, [{key:"siteVisitors", name:"Посетители", color:"--s1"}], fmtN,
+    d=>`<b>${dayLabel(d.day,1)}</b><div class="r"><span>Посетителей</span><b>${fmtN(d.siteVisitors)}</b></div><div class="r"><span>Нажали «Скачать»</span>${fmtN(d.clickAndroid+d.clickIos+d.clickWindows+d.clickMac)}</div>`);
+  barChart($("#chDl"), a.days, DL_SERIES.map(([key,name],i)=>({key,name,color:SERIES[i]})), fmtN,
+    d=>`<b>${dayLabel(d.day,1)}</b>`+DL_SERIES.map(([key,name],i)=>`<div class="r"><span><i style="background:var(${SERIES[i]})"></i>${name}</span>${fmtN(d[key])}</div>`).join("")+`<div class="r" style="margin-top:4px;border-top:1px solid var(--line);padding-top:4px"><span>Обновились из приложения</span>${fmtN(d.dlUpdate)}</div><div class="r"><span>Приложений на связи</span>${fmtN(d.appChecks)}</div>`);
+}
+
+/* круглый шаг оси: 1, 2, 5 × 10ⁿ (целые) */
+const niceStep = raw => { const p=Math.pow(10,Math.floor(Math.log10(Math.max(1,raw)))); return [1,2,5,10].map(m=>m*p).find(v=>v>=raw); };
+/* столбцы по дням (один ряд или стопка); целые значения по оси Y */
+function barChart(el, days, series, fmt, tipHtml){
+  if(!el) return;
+  const W=el.clientWidth||700, H=200, pl=40, pr=8, pt=8, pb=26, n=days.length;
+  const val=(s,d)=>s.get?s.get(d):d[s.key];
+  const totals=days.map(d=>series.reduce((a,s)=>a+(val(s,d)||0),0));
+  const max=Math.max(4,...totals), step=niceStep(max/4), nice=step*4;
+  const y=v=>pt+(H-pt-pb)*(1-v/nice), bw=(W-pl-pr)/n, gap=Math.max(2,bw*.25);
+  let svg=`<svg width="${W}" height="${H}" role="img">`;
+  for(let i=0;i<=4;i++){ const v=step*i, yy=y(v); svg+=`<line x1="${pl}" x2="${W-pr}" y1="${yy}" y2="${yy}" stroke="${cssv("--line")}"/><text x="${pl-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="${cssv("--muted")}">${fmt(v)}</text>`; }
+  const every=Math.ceil(n/Math.max(2,Math.min(8,Math.floor((W-pl)/64))));
+  days.forEach((d,i)=>{
+    const x=pl+i*bw+gap/2, w=Math.max(1,bw-gap); let acc=0;
+    series.forEach(s=>{ const v=val(s,d)||0; if(!v) return; const y0=y(acc), y1=y(acc+v); acc+=v;
+      const hgt=Math.max(1,y0-y1-(acc<totals[i]?2:0));
+      svg+=`<rect x="${x}" y="${y1}" width="${w}" height="${hgt}" rx="${acc===totals[i]?Math.min(4,w/2):0}" fill="${cssv(s.color)}"/>`; });
+    if(i%every===0) svg+=`<text x="${x+w/2}" y="${H-8}" text-anchor="middle" font-size="11" fill="${cssv("--muted")}">${dayLabel(d.day)}</text>`;
+    svg+=`<rect x="${pl+i*bw}" y="${pt}" width="${bw}" height="${H-pt-pb}" fill="transparent" data-i="${i}"/>`;
+  });
+  svg+=`<line x1="${pl}" x2="${W-pr}" y1="${y(0)}" y2="${y(0)}" stroke="${cssv("--line-2")}"/></svg><div class="tip"></div>`;
+  el.innerHTML=svg;
+  const tip=el.querySelector(".tip");
+  el.querySelectorAll("rect[data-i]").forEach(r=>{
+    r.onmousemove=e=>{ tip.innerHTML=tipHtml(days[+r.dataset.i]); placeTip(el,tip,e); };
+    r.onmouseleave=()=>tip.style.display="none";
+  });
+}
+function placeTip(el,tip,e){ const b=el.getBoundingClientRect(); let lx=e.clientX-b.left+14; if(lx+180>b.width) lx=e.clientX-b.left-194;
+  tip.style.left=Math.max(0,lx)+"px"; tip.style.top=Math.max(0,e.clientY-b.top-40)+"px"; tip.style.display="block"; }
+
+/* онлайн: линия по снимкам раз в 5 мин, перекрестие и подсказка */
+function lineChart(el, pts, stepSec){
+  if(!el) return;
+  if(pts.length<2){ el.innerHTML=`<div class="empty" style="padding:30px 10px">Снимки онлайна делаются раз в 5 минут — график появится через 10–15 минут</div>`; return; }
+  const W=el.clientWidth||700, H=200, pl=40, pr=8, pt=8, pb=26;
+  const t0=pts[0].ts, t1=pts[pts.length-1].ts, span=Math.max(1,t1-t0);
+  const max=Math.max(4,...pts.map(p=>p.n)), step=niceStep(max/4), nice=step*4;
+  const x=t=>pl+(W-pl-pr)*(t-t0)/span, y=v=>pt+(H-pt-pb)*(1-v/nice);
+  let path="", prev=null;
+  pts.forEach(p=>{ const gapBreak = prev && p.ts-prev.ts>stepSec*3; path+=`${!prev||gapBreak?"M":"L"}${x(p.ts).toFixed(1)},${y(p.n).toFixed(1)}`; prev=p; });
+  let svg=`<svg width="${W}" height="${H}" role="img" aria-label="Онлайн">`;
+  for(let i=0;i<=4;i++){ const v=step*i, yy=y(v); svg+=`<line x1="${pl}" x2="${W-pr}" y1="${yy}" y2="${yy}" stroke="${cssv("--line")}"/><text x="${pl-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="${cssv("--muted")}">${v}</text>`; }
+  const long=span>2*86400;
+  const nl=Math.max(2,Math.min(5,Math.floor((W-pl)/70)));
+  for(let i=0;i<=nl;i++){ const t=t0+span*i/nl, d=new Date(t*1000);
+    svg+=`<text x="${x(t)}" y="${H-8}" text-anchor="${i===0?"start":i===nl?"end":"middle"}" font-size="11" fill="${cssv("--muted")}">${long?d.toLocaleDateString("ru-RU",{day:"numeric",month:"short"}):d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})}</text>`; }
+  svg+=`<path d="${path}" fill="none" stroke="${cssv("--s1")}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  svg+=`<line id="xh" y1="${pt}" y2="${H-pb}" stroke="${cssv("--line-2")}" visibility="hidden"/><circle id="xd" r="4" fill="${cssv("--s1")}" stroke="${cssv("--surface")}" stroke-width="2" visibility="hidden"/>`;
+  svg+=`<rect x="${pl}" y="${pt}" width="${W-pl-pr}" height="${H-pt-pb}" fill="transparent" id="hit"/></svg><div class="tip"></div>`;
+  el.innerHTML=svg;
+  const tip=el.querySelector(".tip"), xh=el.querySelector("#xh"), xd=el.querySelector("#xd"), hit=el.querySelector("#hit");
+  hit.onmousemove=e=>{ const b=el.getBoundingClientRect(), t=t0+(e.clientX-b.left-pl)/(W-pl-pr)*span;
+    let best=pts[0]; for(const p of pts) if(Math.abs(p.ts-t)<Math.abs(best.ts-t)) best=p;
+    const px=x(best.ts); xh.setAttribute("x1",px); xh.setAttribute("x2",px); xh.setAttribute("visibility","visible");
+    xd.setAttribute("cx",px); xd.setAttribute("cy",y(best.n)); xd.setAttribute("visibility","visible");
+    tip.innerHTML=`<b>${new Date(best.ts*1000).toLocaleString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</b><div class="r"><span>Онлайн</span><b>${best.n}</b></div>`; placeTip(el,tip,e); };
+  hit.onmouseleave=()=>{ tip.style.display="none"; xh.setAttribute("visibility","hidden"); xd.setAttribute("visibility","hidden"); };
+}
+
+/* ===== ноды ===== */
+async function nodes(){
+  const ns = await api("GET","/api/nodes");
+  $("#main").innerHTML = `
+  <div class="topline"><h1>Ноды</h1><button class="btn p" onclick="addNode()">+ Добавить ноду</button></div>
+  <div class="nodes">${ns.map(nodeCard).join("") || `<div class="card empty">Добавьте первую ноду — получите команду установки</div>`}</div>`;
+}
+function nodeCard(n){
+  const s=n.sysStats;
+  const load = s ? Math.min(1,(s.load[0]||0)/(s.cpus||1)) : null;
+  return `<div class="card">
+    <div class="node-h"><span class="flag">${flag(n.countryCode)}</span>
+      <div class="grow"><h3>${esc(n.name)}</h3><div class="addr mono">${esc(n.address)}</div></div>${nodeStatus(n)}</div>
+    ${n.lastStatusMessage?`<div style="margin:0 18px 12px;padding:8px 10px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:12px">${esc(n.lastStatusMessage)}</div>`:""}
+    <div class="metrics">
+      <div class="metric"><div class="k">CPU</div><div class="v">${s?Math.round(load*100)+"%":"—"}</div>${s?bar(load):""}</div>
+      <div class="metric" title="${s?fmtBytes(s.mem_used,1)+" из "+fmtBytes(s.mem_total,0):""}"><div class="k">RAM ${s?"· "+fmtBytes(s.mem_total,0):""}</div><div class="v">${s?Math.round(s.mem_used/s.mem_total*100)+"%":"—"}</div>${s?bar(s.mem_used/s.mem_total):""}</div>
+      <div class="metric"><div class="k">Диск</div><div class="v">${s?Math.round(s.disk_used/s.disk_total*100)+"%":"—"}</div>${s?bar(s.disk_used/s.disk_total):""}</div>
+      <div class="metric"><div class="k">Онлайн</div><div class="v">${n.usersOnline}</div></div>
+      <div class="metric"><div class="k">Трафик сегодня</div><div class="v">${fmtBytes(n.trafficTodayBytes)}</div></div>
+      <div class="metric"><div class="k">Сеть ↓ / ↑</div><div class="v" style="font-size:12.5px">${s&&s.net_rx_bps!=null?fmtSpeed(s.net_rx_bps)+" / "+fmtSpeed(s.net_tx_bps):"—"}</div></div>
+    </div>
+    <div class="row" style="padding:0 18px 12px;font-size:12px;color:var(--muted);gap:14px">
+      <span>Сервер: ${s?uptime(s.uptime):"—"}</span><span>Xray: ${esc(n.xrayVersion||"—")}</span><span>Агент: ${esc(n.agentVersion||"—")}</span><span>Всего: ${fmtBytes(n.trafficUsedBytes)}</span>
+    </div>
+    <div class="protos">${n.inbounds.map(ib=>protoRow(n,ib)).join("") || `<div class="empty" style="padding:14px">Нет протоколов</div>`}</div>
+    <div class="node-f">
+      <button class="btn s" onclick='addInbound(${attr(n)})'>+ Протокол</button>
+      <button class="btn s" onclick="installNode('${n.uuid}')">Установка</button>
+      <span class="grow"></span>
+      <button class="btn s icon" onclick='openMenu(event,nodeMenu(${attr(n)}))'>⋯</button>
+    </div>
+  </div>`;
+}
+function protoRow(n, ib){
+  const d = ib.settings.domain ? ib.settings.domain : n.address;
+  const exit = ib.settings.exit_node ? ` · выход: ${esc(ib.settings.exit_node)}` : "";
+  return `<div class="proto">
+    <div class="nm"><b>${esc(ib.remark||ib.protocolTitle)}</b><div>${esc(ib.protocolTitle)} · ${esc(d)}:${ib.port}${exit}</div></div>
+    ${ib.hidden?`<span class="tag" title="Работает, но не выдаётся клиентам (например, мост)">скрыт</span>`:""}
+    <label class="switch" title="Включён"><input type="checkbox" ${ib.enabled?"checked":""} onchange="toggleIb('${ib.uuid}',{enabled:this.checked})"><span></span></label>
+    <button class="btn s icon ghost" onclick='openMenu(event,ibMenu(${attr(ib)}))'>⋯</button>
+  </div>`;
+}
+async function toggleIb(uuid, patch){ try{ await api("PATCH","/api/inbounds/"+uuid,patch); toast("Сохранено — нода применит за ~10 с"); nodes(); }catch(e){ toast(e.message); } }
+function ibMenu(ib){ return [
+  {t:"Изменить…", f:()=>editInbound(ib)},
+  {t: ib.hidden?"Показывать клиентам":"Скрыть из подписки", f:()=>toggleIb(ib.uuid,{hidden:!ib.hidden})},
+  "-",
+  {t:"Удалить протокол", d:1, f:async()=>{ if(await confirmBox("Удалить протокол с ноды? Клиенты потеряют этот сервер.")){ await api("DELETE","/api/inbounds/"+ib.uuid); nodes(); } }},
+]; }
+function nodeMenu(n){ return [
+  {t:"Изменить…", f:()=>editNode(n)},
+  {t:n.isDisabled?"Включить ноду":"Отключить ноду", f:async()=>{ await api("POST",`/api/nodes/${n.uuid}/actions/${n.isDisabled?"enable":"disable"}`); nodes(); }},
+  {t:"Перевыпустить токен", f:async()=>{ if(await confirmBox("Старый токен перестанет работать — агент нужно будет переустановить командой.", "Перевыпустить")){ const r=await api("POST",`/api/nodes/${n.uuid}/actions/rotate-token`); showInstall(r); } }},
+  "-",
+  {t:"Удалить ноду", d:1, f:async()=>{ if(await confirmBox(`Удалить ноду «${esc(n.name)}»?`)){ await api("DELETE","/api/nodes/"+n.uuid); nodes(); } }},
+]; }
+function addNode(){
+  modal("Новая нода",`
+    <div class="grid2"><label class="f"><span>Название</span><input name="name" required placeholder="Нидерланды 1"></label>
+    <label class="f"><span>Код страны</span><input name="country" maxlength="2" placeholder="NL"></label></div>
+    <label class="f"><span>IP или домен сервера</span><input name="address" required placeholder="1.2.3.4"></label>
+    <label class="f"><span>Первый протокол</span><select name="protocol">${protocols.map(p=>`<option value="${p.id}" ${p.id==="vless_reality"?"selected":""}>${esc(p.title)}</option>`).join("")}</select></label>
+    <p class="muted" style="font-size:12.5px;margin:0">Для WS и XHTTP добавьте протокол после создания — понадобится домен.</p>`,
+  `<button type="button" class="btn" onclick="closeAll()">Отмена</button><button class="btn p">Создать</button>`,
+  async f=>{ const p=f.get("protocol"); const n=await api("POST","/api/nodes",{name:f.get("name"),address:f.get("address"),countryCode:f.get("country"),protocols:p==="vless_reality"||p==="shadowsocks"||p==="hysteria2"?[{protocol:p}]:[]}); nodes(); setTimeout(()=>showInstall(n),60); });
+}
+async function installNode(uuid){ showInstall(await api("GET","/api/nodes/"+uuid)); }
+function showInstall(n){
+  modal(`Установка «${esc(n.name)}»`,`
+    <p style="margin-top:0" class="muted">Выполните на сервере под root (Ubuntu / Debian). Нода появится онлайн через ~10 секунд.</p>
+    <textarea rows="4" readonly onclick="this.select()">${esc(n.installCommand)}</textarea>`,
+  `<button type="button" class="btn" onclick='copy(${attr(n.installCommand)})'>Копировать</button><button type="button" class="btn p" onclick="closeAll()">Готово</button>`,()=>{});
+}
+function editNode(n){
+  modal("Нода",`
+    <div class="grid2"><label class="f"><span>Название</span><input name="name" value="${esc(n.name)}" required></label>
+    <label class="f"><span>Код страны</span><input name="country" value="${esc(n.countryCode)}" maxlength="2"></label></div>
+    <label class="f"><span>Адрес</span><input name="address" value="${esc(n.address)}" required></label>`,
+  `<button type="button" class="btn" onclick="closeAll()">Отмена</button><button class="btn p">Сохранить</button>`,
+  async f=>{ await api("PATCH","/api/nodes/"+n.uuid,{name:f.get("name"),address:f.get("address"),countryCode:f.get("country")}); nodes(); });
+}
+function protoFields(p, values={}, allNodes=[]){
+  return p.fields.map(fl=>{
+    const v = values[fl.key] ?? fl.default ?? "";
+    if(fl.key==="exit_node") return `<label class="f"><span>${esc(fl.title)}</span><select name="s_${fl.key}"><option value="">— напрямую —</option>${allNodes.map(n=>`<option ${n.name===v?"selected":""}>${esc(n.name)}</option>`).join("")}</select></label>`;
+    return `<label class="f"><span>${esc(fl.title)}</span><input name="s_${fl.key}" value="${esc(v)}"></label>`;
+  }).join("");
+}
+const collect = (f,p) => { const s={}; p.fields.forEach(fl=>{ const v=f.get("s_"+fl.key); s[fl.key]= typeof fl.default==="number" ? +v : v; }); return s; };
+async function addInbound(n){
+  const all = (await api("GET","/api/nodes")).filter(x=>x.uuid!==n.uuid);
+  modal(`Протокол на «${esc(n.name)}»`,`
+    <div class="grid2"><label class="f"><span>Протокол</span><select name="protocol" id="ibProto">${protocols.map(p=>`<option value="${p.id}">${esc(p.title)}</option>`).join("")}</select></label>
+    <label class="f"><span>Порт</span><input name="port" id="ibPort" type="number" required></label></div>
+    <label class="f"><span>Название у клиентов</span><input name="remark" placeholder="${flag(n.countryCode)} ${esc(n.name)}"></label>
+    <div id="ibFields"></div>`,
+  `<button type="button" class="btn" onclick="closeAll()">Отмена</button><button class="btn p">Добавить</button>`,
+  async f=>{ const p=protocols.find(x=>x.id===f.get("protocol")); await api("POST",`/api/nodes/${n.uuid}/inbounds`,{protocol:p.id,port:+f.get("port"),remark:f.get("remark"),settings:collect(f,p)}); toast("Добавлено — нода применит за ~10 с"); nodes(); });
+  const upd=()=>{ const p=protocols.find(x=>x.id===$("#ibProto").value); $("#ibPort").value=p.defaultPort; $("#ibFields").innerHTML=protoFields(p,{},all); };
+  $("#ibProto").onchange=upd; upd();
+}
+async function editInbound(ib){
+  const p=protocols.find(x=>x.id===ib.protocol)||{fields:[]};
+  const all=(await api("GET","/api/nodes"));
+  const info=Object.entries(ib.settings).filter(([k])=>!p.fields.some(f=>f.key===k)&&k!=="hidden").map(([k,v])=>`<div class="mono muted" style="font-size:11.5px;word-break:break-all">${esc(k)}: ${esc(String(v).slice(0,90))}</div>`).join("");
+  modal(esc(ib.protocolTitle),`
+    <div class="grid2"><label class="f"><span>Порт</span><input name="port" type="number" value="${ib.port}"></label>
+    <label class="f"><span>Название у клиентов</span><input name="remark" value="${esc(ib.remark)}"></label></div>
+    ${protoFields(p, ib.settings, all)}${info?`<div class="section"><h4>Служебное</h4>${info}</div>`:""}`,
+  `<button type="button" class="btn" onclick="closeAll()">Отмена</button><button class="btn p">Сохранить</button>`,
+  async f=>{ await api("PATCH","/api/inbounds/"+ib.uuid,{port:+f.get("port"),remark:f.get("remark"),settings:collect(f,p)}); toast("Сохранено"); nodes(); });
+}
+
+/* ===== пользователи ===== */
+let uState={search:"",status:"",start:0,size:25}, selected=new Set();
+async function users(){
+  const [r, st] = await Promise.all([
+    api("GET",`/api/users?start=${uState.start}&size=${uState.size}&search=${encodeURIComponent(uState.search)}&status=${uState.status}`),
+    api("GET","/api/system/stats")]);
+  const chips=[["","Все",st.users.total],["ACTIVE","Активные",st.users.ACTIVE],["ONLINE","Онлайн",st.onlineUsers],["EXPIRED","Истёкшие",st.users.EXPIRED],["LIMITED","Лимит",st.users.LIMITED],["DISABLED","Отключённые",st.users.DISABLED]];
+  $("#main").innerHTML = `
+  <div class="topline"><h1>Пользователи</h1><button class="btn p" onclick="editUser()">+ Пользователь</button></div>
+  <div class="toolbar">
+    <div style="position:relative;width:280px;max-width:100%"><input id="search" placeholder="Поиск: имя, заметка, uuid" value="${esc(uState.search)}"></div>
+    <div class="chips">${chips.map(([v,t,n])=>`<button class="chip ${uState.status===v?"on":""}" onclick="uState.status='${v}';uState.start=0;users()">${t}<span class="n">${n}</span></button>`).join("")}</div>
+  </div>
+  <div class="card">
+    <div id="bulk"></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr>
+      <th style="width:34px"><input type="checkbox" id="selAll" style="width:auto"></th>
+      <th>Пользователь</th><th>Статус</th><th class="hide-m">Трафик</th><th>Действует до</th><th class="hide-m">Устройства</th><th class="hide-m">Активность</th><th></th></tr></thead>
+    <tbody>${r.users.map(userRow).join("") || `<tr><td colspan="8"><div class="empty">Никого не найдено</div></td></tr>`}</tbody></table></div>
+    <div class="pager"><span>${r.total? `${uState.start+1}–${Math.min(uState.start+uState.size,r.total)} из ${r.total}`:""}</span>
+      <div class="row"><button class="btn s" ${uState.start===0?"disabled":""} onclick="uState.start-=uState.size;users()">← Назад</button><button class="btn s" ${uState.start+uState.size>=r.total?"disabled":""} onclick="uState.start+=uState.size;users()">Дальше →</button></div></div>
+  </div>`;
+  const s=$("#search"); s.oninput=()=>{ clearTimeout(s._t); s._t=setTimeout(()=>{ uState.search=s.value; uState.start=0; users().then(()=>{const n=$("#search"); n.focus(); n.setSelectionRange(n.value.length,n.value.length);}); },300); };
+  $("#selAll").onchange=e=>{ document.querySelectorAll(".rowsel").forEach(c=>{c.checked=e.target.checked; c.checked?selected.add(c.value):selected.delete(c.value);}); renderBulk(); };
+  document.querySelectorAll(".rowsel").forEach(c=>{ c.checked=selected.has(c.value); c.onclick=e=>e.stopPropagation(); c.onchange=()=>{ c.checked?selected.add(c.value):selected.delete(c.value); renderBulk(); }; });
+  renderBulk();
+}
+function userRow(u){
+  const used=u.usedTrafficBytes, lim=u.trafficLimitBytes, dl=daysLeft(u.expireAt);
+  return `<tr onclick="openUser('${u.uuid}')">
+    <td><input type="checkbox" class="rowsel" value="${u.uuid}" style="width:auto"></td>
+    <td><div class="uname"><div class="avatar">${initials(u.username)}</div><div><b>${esc(u.username)}</b><small>${esc(u.description||"—")}</small></div></div></td>
+    <td>${statusPill(u.status)}</td>
+    <td class="hide-m" style="min-width:150px"><div style="font-size:12.5px;margin-bottom:4px">${fmtBytes(used)} <span class="muted">/ ${lim?fmtBytes(lim,0):"∞"}</span></div>${lim?bar(used/lim):""}</td>
+    <td>${fmtDate(u.expireAt)}<div class="muted" style="font-size:12px">${u.status==="EXPIRED"||dl<0?"истёк":dl===0?"сегодня":"осталось "+dl+" дн"}</div></td>
+    <td class="hide-m">${u.hwidDeviceLimit ?? "∞"}</td>
+    <td class="hide-m"><div class="row" style="gap:6px">${u.isOnline?`<span class="online-dot"></span>онлайн`:`<span class="muted">${ago(u.onlineAt)}</span>`}</div></td>
+    <td style="text-align:right" onclick="event.stopPropagation()"><button class="btn s icon ghost" onclick='openMenu(event,userMenu(${attr(u)}))'>⋯</button></td>
+  </tr>`;
+}
+function renderBulk(){
+  const b=$("#bulk"); if(!b) return;
+  b.innerHTML = selected.size ? `<div class="bulk"><b>Выбрано: ${selected.size}</b><span class="grow"></span>
+    <button class="btn s" onclick="bulk('extend')">+30 дней</button><button class="btn s" onclick="bulk('reset-traffic')">Сбросить трафик</button>
+    <button class="btn s" onclick="bulk('disable')">Отключить</button><button class="btn s" onclick="bulk('enable')">Включить</button>
+    <button class="btn s ghost" onclick="selected.clear();users()">Снять выбор</button></div>` : "";
+}
+async function bulk(action){
+  const ids=[...selected]; let ok=0;
+  for(const id of ids){ try{ await api("POST",`/api/users/${id}/actions/${action}${action==="extend"?"?days=30":""}`); ok++; }catch(e){} }
+  toast(`Готово: ${ok} из ${ids.length}`); selected.clear(); users();
+}
+function userMenu(u){ return [
+  {t:"Открыть карточку", f:()=>openUser(u.uuid)},
+  {t:"Скопировать подписку", f:()=>copy(u.subscriptionUrl)},
+  "-",
+  {t:"+7 дней", f:()=>userAct(u.uuid,"extend?days=7","Продлено на 7 дней")},
+  {t:"+30 дней", f:()=>userAct(u.uuid,"extend?days=30","Продлено на 30 дней")},
+  {t:"Сбросить трафик", f:()=>userAct(u.uuid,"reset-traffic","Трафик сброшен")},
+  {t:u.status==="DISABLED"?"Включить":"Отключить", f:()=>userAct(u.uuid,u.status==="DISABLED"?"enable":"disable","Готово")},
+  {t:"Изменить…", f:()=>editUser(u)},
+  "-",
+  {t:"Удалить", d:1, f:async()=>{ if(await confirmBox(`Удалить ${esc(u.username)}? Подписка перестанет работать.`)){ await api("DELETE","/api/users/"+u.uuid); toast("Удалён"); refreshUsersView(); } }},
+]; }
+async function userAct(uuid, action, msg){ try{ await api("POST",`/api/users/${uuid}/actions/${action}`); toast(msg); refreshUsersView(); if($("#drawer").classList.contains("on")) openUser(uuid); }catch(e){ toast(e.message); } }
+function refreshUsersView(){ if(page==="users") users(); else if(page==="dash") dash(); }
+
+async function openUser(uuid){
+  const [u, dev] = await Promise.all([api("GET","/api/users/"+uuid), api("GET","/api/hwid/devices/"+uuid).catch(()=>({devices:[]}))]);
+  const dl=daysLeft(u.expireAt), lim=u.trafficLimitBytes;
+  drawer(`
+    <div class="drawer-h"><div class="avatar" style="width:38px;height:38px">${initials(u.username)}</div>
+      <div class="grow"><h2>${esc(u.username)}</h2><div class="muted" style="font-size:12.5px">${esc(u.description||"без заметки")}</div></div>
+      ${statusPill(u.status)}<button class="btn icon ghost" onclick="closeAll()">✕</button></div>
+    <div class="drawer-b">
+      <div class="section"><h4>Подписка</h4>
+        <div class="qr" id="qr"></div>
+        <div class="copybox"><input readonly value="${esc(u.subscriptionUrl)}" onclick="this.select()"><button class="btn" onclick='copy(${attr(u.subscriptionUrl)})'>Копировать</button><a class="btn" href="${esc(u.subscriptionUrl)}" target="_blank">↗</a></div>
+      </div>
+      <div class="section"><h4>Срок и трафик</h4>
+        <div class="kv">
+          <div><span>Действует до</span><b>${fmtDate(u.expireAt)}</b><div class="muted" style="font-size:12px">${dl<0?"истёк "+(-dl)+" дн назад":"осталось "+dl+" дн"}</div></div>
+          <div><span>Трафик</span><b>${fmtBytes(u.usedTrafficBytes)} / ${lim?fmtBytes(lim,0):"∞"}</b>${lim?`<div style="margin-top:6px">${bar(u.usedTrafficBytes/lim)}</div>`:""}</div>
+          <div><span>За всё время</span><b>${fmtBytes(u.lifetimeUsedTrafficBytes)}</b></div>
+          <div><span>Сброс трафика</span><b>${({NO_RESET:"никогда",DAY:"ежедневно",WEEK:"еженедельно",MONTH:"ежемесячно"})[u.trafficLimitStrategy]||u.trafficLimitStrategy}</b></div>
+          <div><span>Был онлайн</span><b>${u.isOnline?"сейчас":ago(u.onlineAt)}</b></div>
+          <div><span>Подписка обновлялась</span><b>${ago(u.subLastOpenedAt)}</b></div>
+        </div>
+        <div class="quick" style="margin-top:12px">
+          <button class="btn s" onclick="userAct('${uuid}','extend?days=7','Продлено на 7 дней')">+7 дн</button>
+          <button class="btn s" onclick="userAct('${uuid}','extend?days=30','Продлено на 30 дней')">+30 дн</button>
+          <button class="btn s" onclick="userAct('${uuid}','extend?days=90','Продлено на 90 дней')">+90 дн</button>
+          <button class="btn s" onclick="userAct('${uuid}','extend?days=365','Продлено на год')">+1 год</button>
+          <button class="btn s" onclick="userAct('${uuid}','reset-traffic','Трафик сброшен')">Сбросить трафик</button>
+        </div>
+      </div>
+      <div class="section"><h4>Устройства · ${dev.devices.length} из ${u.hwidDeviceLimit ?? "∞"}</h4>
+        <div class="list">${dev.devices.map(d=>`<div class="it"><div class="avatar" style="background:var(--surface-2);color:var(--text-2)">${(d.platform||"?").slice(0,2)}</div>
+          <div class="grow"><b>${esc(d.platform||"Устройство")} ${esc(d.deviceModel||"")}</b><div class="muted" style="font-size:12px">${esc(d.userAgent||"")} · ${fmtDT(d.createdAt)}</div></div>
+          <button class="btn s icon ghost" title="Отвязать" onclick="delDevice('${uuid}','${esc(d.hwid)}')">✕</button></div>`).join("") || `<div class="muted">Пока нет привязанных устройств</div>`}</div>
+      </div>
+      <div class="section"><h4>Служебное</h4><div class="mono muted" style="font-size:11.5px;word-break:break-all">uuid: ${esc(u.uuid)}<br>создан: ${fmtDT(u.createdAt)}</div></div>
+      <div class="row">
+        <button class="btn" onclick='editUser(${attr(u)})'>Изменить</button>
+        <button class="btn" onclick="userAct('${uuid}','${u.status==="DISABLED"?"enable":"disable"}','Готово')">${u.status==="DISABLED"?"Включить":"Отключить"}</button>
+        <button class="btn" onclick="revoke('${uuid}')">Новая ссылка</button>
+        <span class="grow"></span>
+        <button class="btn d" onclick="delUser('${uuid}','${esc(u.username)}')">Удалить</button>
+      </div>
+    </div>`);
+  try{ new QRCode($("#qr"),{text:u.subscriptionUrl,width:180,height:180,correctLevel:QRCode.CorrectLevel.M}); }catch(e){ $("#qr").remove(); }
+}
+async function delDevice(uuid,hwid){ await api("POST","/api/hwid/devices/delete",{userUuid:uuid,hwid}); toast("Устройство отвязано"); openUser(uuid); }
+async function revoke(uuid){ if(await confirmBox("Старая ссылка подписки перестанет работать, устройства отвяжутся.","Выдать новую")){ await api("POST",`/api/users/${uuid}/actions/revoke`); toast("Новая ссылка выдана"); openUser(uuid); refreshUsersView(); } }
+async function delUser(uuid,name){ if(await confirmBox(`Удалить ${name}? Подписка перестанет работать.`)){ await api("DELETE","/api/users/"+uuid); toast("Удалён"); closeAll(); refreshUsersView(); } }
+const toLocal = iso => { const d=new Date(iso); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+function editUser(u){
+  const isNew=!u;
+  u = u || {username:"",expireAt:new Date(Date.now()+30*86400e3).toISOString(),trafficLimitBytes:0,trafficLimitStrategy:"MONTH",hwidDeviceLimit:3,description:"",status:"ACTIVE"};
+  modal(isNew?"Новый пользователь":"Изменить "+esc(u.username),`
+    ${isNew?`<label class="f"><span>Имя (латиница, цифры, _ -)</span><input name="username" required pattern="[A-Za-z0-9_\\-]{3,36}" placeholder="ivan_petrov"></label>`:""}
+    <div class="grid2">
+      <label class="f"><span>Действует до</span><input name="expire" type="date" value="${toLocal(u.expireAt)}" required></label>
+      <label class="f"><span>Лимит трафика, ГБ (0 — без)</span><input name="limit" type="number" step="any" min="0" value="${+(u.trafficLimitBytes/1024**3).toFixed(2)}"></label>
+      <label class="f"><span>Сброс трафика</span><select name="strategy">${[["NO_RESET","Никогда"],["DAY","Ежедневно"],["WEEK","Еженедельно"],["MONTH","Ежемесячно"]].map(([v,t])=>`<option value="${v}" ${v===u.trafficLimitStrategy?"selected":""}>${t}</option>`).join("")}</select></label>
+      <label class="f"><span>Лимит устройств (пусто — без)</span><input name="hwid" type="number" min="0" value="${u.hwidDeviceLimit ?? ""}"></label>
+    </div>
+    <label class="f"><span>Заметка</span><input name="description" value="${esc(u.description)}" placeholder="Telegram, источник, тариф…"></label>
+    <label class="row" style="gap:8px;cursor:pointer"><label class="switch"><input type="checkbox" name="active" ${u.status!=="DISABLED"?"checked":""}><span></span></label> Включён</label>`,
+  `<button type="button" class="btn" onclick="closeAll()">Отмена</button><button class="btn p">${isNew?"Создать":"Сохранить"}</button>`,
+  async f=>{
+    const exp=new Date(f.get("expire")+"T23:59:59");
+    const body={expireAt:exp.toISOString(),trafficLimitBytes:Math.round((+f.get("limit")||0)*1024**3),trafficLimitStrategy:f.get("strategy"),
+      hwidDeviceLimit:f.get("hwid")===""?null:+f.get("hwid"),description:f.get("description"),status:f.get("active")?"ACTIVE":"DISABLED"};
+    if(isNew){ body.username=f.get("username"); const r=await api("POST","/api/users",body); toast("Пользователь создан"); refreshUsersView(); setTimeout(()=>openUser(r.uuid),80); }
+    else { body.uuid=u.uuid; await api("PATCH","/api/users",body); toast("Сохранено"); refreshUsersView(); if($("#drawer").classList.contains("on")) setTimeout(()=>openUser(u.uuid),80); }
+  });
+}
+
+/* ===== настройки ===== */
+async function settings(){
+  const [st, tokens] = await Promise.all([api("GET","/api/settings"), api("GET","/api/tokens").catch(()=>[])]);
+  $("#main").innerHTML = `
+  <div class="topline"><h1>Настройки</h1></div>
+  <div class="dash">
+    <div class="stack">
+      <div class="card"><div class="card-h"><h3>Подписка</h3></div><div class="card-b">
+        <form id="subForm">
+          <div class="grid2">
+            <label class="f"><span>Название в приложениях</span><input name="sub_title" value="${esc(st.sub_title)}"></label>
+            <label class="f"><span>Автообновление, часов</span><input name="sub_update_hours" type="number" min="1" value="${esc(st.sub_update_hours)}"></label>
+          </div>
+          <label class="f"><span>Ссылка на поддержку (Telegram и т.п.)</span><input name="sub_support_url" value="${esc(st.sub_support_url)}" placeholder="https://t.me/…"></label>
+          <label class="row" style="gap:8px;cursor:pointer;margin-bottom:14px"><label class="switch"><input type="checkbox" name="hwid_strict" ${st.hwid_strict==="true"?"checked":""}><span></span></label> Не выдавать подписку приложениям без HWID (строгий лимит устройств)</label>
+          <button class="btn p">Сохранить</button>
+        </form>
+      </div></div>
+      <div class="card"><div class="card-h"><h3>Сервис</h3></div><div class="card-b">
+        <form id="svcForm">
+          <label class="row" style="gap:8px;cursor:pointer;margin-bottom:6px"><label class="switch"><input type="checkbox" name="block_ads" ${st.block_ads==="true"?"checked":""}><span></span></label> Блокировать рекламу и трекеры</label>
+          <p class="muted" style="margin:0 0 12px 52px;font-size:12px">Правило на всех нодах: домены из списка geosite:category-ads-all отбрасываются. Работает в любом приложении, для трафика через VPN.</p>
+          <label class="row" style="gap:8px;cursor:pointer;margin-bottom:6px"><label class="switch"><input type="checkbox" name="block_ads_extended" ${st.block_ads_extended==="true"?"checked":""}><span></span></label> Расширенные списки: AdGuard DNS filter + RU AdList</label>
+          <p class="muted" style="margin:0 0 16px 52px;font-size:12px">${st.adlists&&st.adlists.count?`${st.adlists.count.toLocaleString("ru-RU")} доменов · обновлено ${fmtDT(st.adlists.updatedAt)}`:"Ещё не скачаны"} · обновляются раз в сутки · <a href="#" id="adsRefresh">обновить сейчас</a></p>
+          <label class="row" style="gap:8px;cursor:pointer;margin-bottom:12px"><label class="switch"><input type="checkbox" name="free_registration" ${st.free_registration==="true"?"checked":""}><span></span></label> Бесплатная выдача подписок (сайт и приложение)</label>
+          <div class="grid2">
+            <label class="f"><span>Срок, дней (0 — бессрочно)</span><input name="free_days" type="number" min="0" value="${esc(st.free_days)}"></label>
+            <label class="f"><span>Трафик, ГБ в месяц (0 — без лимита)</span><input name="free_traffic_gb" type="number" min="0" value="${esc(st.free_traffic_gb)}"></label>
+          </div>
+          <label class="f"><span>Новых подписок с одного IP в сутки</span><input name="free_per_ip_day" type="number" min="1" value="${esc(st.free_per_ip_day)}"></label>
+          <button class="btn p">Сохранить</button>
+        </form>
+      </div></div>
+      <div class="card"><div class="card-h"><h3>API-токены</h3><button class="btn s p" onclick="newToken()">+ Токен</button></div><div class="card-b">
+        <p class="muted" style="margin-top:0;font-size:13px">Для сайта и бота. API совместим с RemnaWave — в nexalink-web задаются <span class="mono">RW_URL</span> и <span class="mono">RW_TOKEN</span>. <a href="/api/docs" target="_blank">Документация API →</a></p>
+        <div class="list">${tokens.map(t=>`<div class="it"><div class="grow"><b>${esc(t.name)}</b><div class="mono muted">${esc(t.token.slice(0,12))}… · ${fmtDT(t.createdAt)}</div></div><button class="btn s" onclick='copy(${attr(t.token)})'>Копировать</button><button class="btn s icon ghost" onclick="delToken('${t.token}')">✕</button></div>`).join("") || `<div class="muted">Токенов нет</div>`}</div>
+      </div></div>
+    </div>
+    <div class="stack">
+      <div class="card"><div class="card-h"><h3>Пароль администратора</h3></div><div class="card-b">
+        <form id="pwForm"><label class="f"><span>Новый пароль</span><input name="password" type="password" minlength="8" required></label><button class="btn p">Сменить пароль</button></form>
+      </div></div>
+      <div class="card"><div class="card-h"><h3>Протоколы</h3></div><div class="card-b list">
+        ${protocols.map(p=>`<div class="it"><div class="grow"><b>${esc(p.title)}</b><div class="muted" style="font-size:12px">${p.core==="xray"?"ядро Xray":"своё ядро"} · ${p.transport.toUpperCase()} · порт по умолчанию ${p.defaultPort}</div></div></div>`).join("")}
+      </div></div>
+    </div>
+  </div>`;
+  $("#subForm").onsubmit=async e=>{ e.preventDefault(); const f=new FormData(e.target);
+    try{ await api("PATCH","/api/settings",{sub_title:f.get("sub_title"),sub_update_hours:f.get("sub_update_hours"),sub_support_url:f.get("sub_support_url"),hwid_strict:f.get("hwid_strict")?"true":"false"}); toast("Настройки подписки сохранены"); }catch(err){ toast(err.message); } };
+  $("#svcForm").onsubmit=async e=>{ e.preventDefault(); const f=new FormData(e.target);
+    try{ await api("PATCH","/api/settings",{block_ads:f.get("block_ads")?"true":"false",block_ads_extended:f.get("block_ads_extended")?"true":"false",free_registration:f.get("free_registration")?"true":"false",
+      free_days:f.get("free_days")||"0",free_traffic_gb:f.get("free_traffic_gb")||"0",free_per_ip_day:f.get("free_per_ip_day")||"5"}); toast("Настройки сервиса сохранены — ноды применят за ~10 с");
+      if(f.get("block_ads_extended") && !(st.adlists&&st.adlists.count)){ toast("Скачиваю списки рекламы…"); await api("POST","/api/settings/adlists/refresh"); toast("Списки скачаны"); settings(); }
+    }catch(err){ toast(err.message); } };
+  $("#adsRefresh").onclick=async e=>{ e.preventDefault(); toast("Скачиваю списки рекламы…");
+    try{ const r=await api("POST","/api/settings/adlists/refresh"); toast(`Готово: ${r.count.toLocaleString("ru-RU")} доменов`); settings(); }catch(err){ toast(err.message); } };
+  $("#pwForm").onsubmit=async e=>{ e.preventDefault(); try{ await api("POST","/api/admin/password",{password:new FormData(e.target).get("password")}); toast("Пароль изменён"); e.target.reset(); }catch(err){ toast(err.message); } };
+}
+function newToken(){
+  modal("Новый API-токен",`<label class="f"><span>Название</span><input name="name" placeholder="nexalink-web" required></label>`,
+  `<button type="button" class="btn" onclick="closeAll()">Отмена</button><button class="btn p">Создать</button>`,
+  async f=>{ const r=await api("POST","/api/tokens",{name:f.get("name")}); copy(r.token); settings(); });
+}
+async function delToken(t){ if(await confirmBox("Удалить токен? Сервисы с ним потеряют доступ.")){ await api("DELETE","/api/tokens/"+t); settings(); } }
+
+show();
+</script>
+</body>
+</html>
